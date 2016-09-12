@@ -2,7 +2,6 @@
 <html>
 <head>
 	<title>Bloom Labs</title>
-	<link rel="stylesheet" type="text/css" href="index.css">
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
@@ -104,9 +103,98 @@
 		.content{
 			width: 80%;
 			height: 100%;
-			background: #F5F3F8;
+			background: #F2EFF6;
 			min-height: 400px;
 			float: left;
+		}
+		
+		.content .header{
+			padding: 10px 20px;
+			background: #FAFAFA;
+		}
+
+		.content .header .left-header .circle{
+			width: 40px;
+		    height: 40px;
+		    float: left;
+		    border: 1px solid #d9edf7;
+		    border-radius: 20px;
+		    margin-right: 10px;
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		}
+		.content .header .left-header .text{
+			float: left;
+		}
+		
+		.content .header .left-header .level1{
+			color: #686868;
+			font-size: 1rem;
+		}
+
+		.content .header .left-header .detail {
+			color: #686868;
+			font-size: 0.7rem;
+		}
+
+		.chat{
+			padding: 16px;
+			flex-direction: column;
+			display: flex;
+			overflow-y: scroll;
+			height: 500px; 
+		}
+
+		.text_message.me {
+		    background: #fff;
+		    padding: 10px;
+		    border-radius: 3px;
+		    margin: 4px 10px;
+		    box-shadow: 4px 4px 4px #efefef;
+		    font-size: 0.8rem;
+		    align-self: flex-start;
+		    position: relative;
+		}
+
+		.text_message.me:after {
+			content: '';
+			position: absolute;
+			border-style: solid;
+			border-width: 8px 15px 8px 0;
+			border-color: transparent #FFFFFF;
+			display: block;
+			width: 0;
+			z-index: 1;
+			margin-top: -8px;
+			left: -13px;
+			top: 50%;
+		}
+
+		.text_message.other {
+		    background: #9E5DDF;
+		    color: #fff;
+		    padding: 10px;
+		    border-radius: 3px;
+		    margin: 4px 10px;
+		    box-shadow: 4px 4px 4px #efefef;
+		    font-size: 0.8rem;
+		    align-self: flex-end;
+		    position: relative;
+		}
+
+		.text_message.other:after {
+			content: '';
+			position: absolute;
+			border-style: solid;
+			border-width: 8px 0 8px 15px;
+			border-color: transparent #9E5DDF;
+			display: block;
+			width: 0;
+			z-index: 1;
+			margin-top: -8px;
+			right: -15px;
+			top: 50%;
 		}
 
 		@media only screen and (max-device-width: 480px) {
@@ -114,13 +202,33 @@
 				width: 100%;
 			}
 
-			div.intro{
+			div.sidebar {
 				display: none;
+			}
+
+			input.textarea {
+				width : 100%:;
 			}
 		}
 
 		.clear{
 			clear : both;
+		}
+		input.textarea {
+		    position: fixed;
+		    bottom: 0px;
+		    left: 20%;
+		    right: 0px;
+		    width: 80%;
+		    height: 50px;
+		    z-index: 99;
+		    background: #fafafa;
+		    border: none;
+		    outline: none;
+		    padding-left: 55px;
+		    padding-right: 55px;
+		    color: #666;
+		    font-weight: 400;
 		}
 	</style>
 </head>
@@ -173,12 +281,29 @@
 			</div>
 	</div>
     <div class="content">
+    	<div class="header">
+    		<div class="left-header">
+				<div class="circle">
+					<i class="fa fa-comments"></i>
+				</div>
+				<div class="text">
+					<div class="level1">Chat</div>
+					<div class="detail">Hari typing...</div>
+					<div class="clear"></div>
+				</div>
+				<div class="clear"></div>
+			</div>
+    	</div>
+    	<div class="main">
+    		<div class="chat" rel="chat">
+    			
+    		</div>
+    	</div>
     	<input class="textarea" type="text" id="content" placeholder="Type here!"/><div class="emojis"></div>
     </div>
     
     
     <script type="text/javascript" src="jquery-3.1.0.js"></script>
-    <script src="jquery.pjax.js"></script>
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="jstorage.js"></script>
@@ -194,9 +319,9 @@
 			                //self.publish();
 			            }
 			        },
-			        message: function(message) {
-			            //console.log("New Message!!", message);
-			            self.addMessage(message);
+			        message: function(packet) {
+			            console.log("New Message!!", packet);
+			            self.addMessage(packet.message);
 			        },
 			        presence: function(presenceEvent) {
 			            // handle presence
@@ -211,13 +336,17 @@
 			//console.log("Since we're publishing on subscribe connectEvent, we're sure we'll receive the following publish.");
 			var self = this;
 			var message = jQuery('#content').val();
+			var packet = {
+				content : message,
+				sender : $.jStorage.get("uuid")
+			}
 	        var publishConfig = {
 	            channel : this.channel,
-	            message : message
+	            message : packet
 	        };
 
 	        pubnub.publish(publishConfig, function(status, response) {
-	            console.log(status);
+	            console.log(status,response);
 	            if(status.statusCode == 200){
 	            	jQuery('#content').val('');
 	            }
@@ -230,6 +359,7 @@
 			        uuid : uuid
     		});
     		this.subscribe();
+    		this.getHistory();
 		},
 		bindEvents : function() {
 			
@@ -255,24 +385,59 @@
 			var value = $.jStorage.get("uuid");
 			self.bindEvents();
 			if(!value) {
-			    //$("#usermodel").modal('show');
+			    $("#usermodel").modal('show');
 			} else {
 			    self.connect(value);	
 			}
 		},
 		addMessage : function(message) {
-			var tmpl = '<li class="other">\
-					        <div class="avatar"><img src="http://i.imgur.com/DY6gND0.png" draggable="false"/></div>\
-					      <div class="msg">';
-			    tmpl += '<p>' + message.message + '</p>';
-			    tmpl +=	'<time>20:17</time>\
-					      </div>\
-					    </li>';
-				$("[rel=chat]").append(tmpl);
-				$('html, body').animate({
-                    scrollTop: $("[rel=chat]").offset().bottom
-                }, 2000);
+			var self = this;
+			$("[rel=chat]").append(self.getEntryMarkup(message));
+			/*
+			$('html, body').animate({
+                scrollTop: $("[rel=chat]").offset().bottom
+            }, 2000);
+            */
+		},
+		addListOfMessages : function(messages) {
+			var list = '';
+			var self = this;
 
+			$.each(messages,function(idx,el) {
+				console.log(el);
+				if(jQuery.isPlainObject(el.entry)){
+					list += self.getEntryMarkup(el.entry);	
+				}
+			});
+			$("[rel=chat]").append(list);
+		},
+		getEntryMarkup : function(message) {
+			var current_user = $.jStorage.get("uuid");
+			if(current_user == message.sender){
+				var tmpl = '<div class="text_message me">';
+			    tmpl += '' + message.content + '';
+			    tmpl +=	'</div>';
+			} else {
+				var tmpl = '<div class="text_message other">';
+			    tmpl += '' + message.content + '';
+			    tmpl +=	'</div>';
+			}
+			return tmpl;
+		},
+		getHistory : function() {
+			var self = this;
+			pubnub.history({
+		        channel: self.channel,
+		        reverse: true, // true to send via post
+		        count: 100, // how many items to fetch
+		        includeTimetoken: true // include time token for each item.
+		    },
+		    function (status, response) {
+		        // handle status, response
+		        if(status.statusCode == 200) {
+		        	self.addListOfMessages(response.messages);
+		        }
+		    });
 		}
 	};
 

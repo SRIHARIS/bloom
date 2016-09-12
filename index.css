@@ -298,9 +298,9 @@ emoji.funny{background-image: url(http://i.imgur.com/qKia58V.png);}
 input.textarea {
     position: fixed;
     bottom: 0px;
-    left: 0px;
+    left: 20%;
     right: 0px;
-    width: 100%;
+    width: 80%;
     height: 50px;
     z-index: 99;
     background: #fafafa;
