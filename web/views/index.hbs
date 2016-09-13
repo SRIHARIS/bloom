@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bloom Labs</title>
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="asset/css/index.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<div class="sidebar">
+			<div class="intro">
+					<div class="circle">
+						  SH
+					</div>
+					<div class="message">
+						 <div class="title">Bloom Labs</div>
+						  <div class="subtitle">Crazy stuff starts at Heart</div>
+					</div>
+					<div class="clear"></div>
+			</div>
+			<div class="items">
+					<div class="item active" link="chat">
+						<div class="circle">
+							<i class="fa fa-comments"></i>
+						</div>
+						<div class="text">
+							<div class="level1">Chat</div>
+							<div class="detail">Last message</div>
+							<div class="clear"></div>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<div class="item" link="files">
+						<div class="circle">
+							<i class="fa fa-dropbox"></i>
+						</div>
+						<div class="text">
+							<div class="level1">Files</div>
+							<div class="detail">last updated</div>
+							<div class="clear"></div>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<div class="item" link="notes">
+						<div class="circle">
+							<i class="fa fa-heartbeat"></i>
+						</div>
+						<div class="text">
+							<div class="level1">Note</div>
+							<div class="detail">hello youtube</div>
+							<div class="clear"></div>
+						</div>
+						<div class="clear"></div>
+					</div>
+			</div>
+	</div>
+    <div class="content">
+    	
+    </div>
+    <script type="text/javascript" src="asset/js/jquery-3.1.0.js"></script>
+    <script src="asset/js/"></script>
+    <script src="asset/js/common.js"></script>
+    <script src="asset/js/chat.js"></script>
+	<script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.0.9.js"></script>
+	<script>
+
+	jQuery(document).ready(function() {
+		$('.items .item').click(function(event){
+			target = $( event.target );
+			var link = target.attr('link');
+			$('.item').removeClass('active');
+			if(link == 'chat') {
+				$.get( "/chat", function( data ) {
+				  $( ".content" ).html( data );
+				  chat_stub.init();
+				  $(".item[link=" + link + "]").addClass('active');
+				});
+			}
+			if(link == 'files') {
+				$.get( "/files", function( data ) {
+				  $( ".content" ).html( data );
+				  $(".item[link=" + link + "]").addClass('active');
+				});
+			}
+			if(link == 'notes') {
+				$.get( "/notes", function( data ) {
+				  $( ".content" ).html( data );
+				  $(".item[link=" + link + "]").addClass('active');
+				});
+			}
+		})
+	});
+	
+</script>
+</body>
+<!--
+<div class="modal fade" tabindex="-1" role="dialog" id="usermodel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Welcome</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="recipient-name" class="control-label">Name:</label>
+            <input type="text" class="form-control" id="recipient-name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="login">Get In</button>
+      </div>
+    </div>
+  </div>
+</div>-->
+</html>

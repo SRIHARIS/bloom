@@ -1,0 +1,114 @@
+<style>
+	.chat{
+		padding: 16px;
+		flex-direction: column;
+		display: flex;
+		overflow-y: scroll;
+		height: 500px; 
+	}
+
+	.text_message.me {
+	    background: #fff;
+	    padding: 4px 10px;
+	    border-radius: 3px;
+	    margin: 4px 10px;
+	    box-shadow: 4px 4px 4px #efefef;
+	    font-size: 0.8rem;
+	    align-self: flex-start;
+	    position: relative;
+	}
+
+	.text_message.me:after {
+		content: '';
+		position: absolute;
+		border-style: solid;
+		border-width: 8px 15px 8px 0;
+		border-color: transparent #FFFFFF;
+		display: block;
+		width: 0;
+		z-index: 1;
+		margin-top: -8px;
+		left: -13px;
+		top: 50%;
+	}
+
+	.text_message.other {
+	    background: #9E5DDF;
+	    color: #fff;
+	    padding: 4px 10px;
+	    border-radius: 3px;
+	    margin: 4px 10px;
+	    box-shadow: 4px 4px 4px #efefef;
+	    font-size: 0.8rem;
+	    align-self: flex-end;
+	    position: relative;
+	}
+
+	.text_message.other:after {
+		content: '';
+		position: absolute;
+		border-style: solid;
+		border-width: 8px 0 8px 15px;
+		border-color: transparent #9E5DDF;
+		display: block;
+		width: 0;
+		z-index: 1;
+		margin-top: -8px;
+		right: -15px;
+		top: 50%;
+	}
+
+	@media only screen and (max-device-width: 480px) {
+		div.content{
+			width: 100%;
+		}
+
+		div.sidebar {
+			display: none;
+		}
+
+		input.textarea {
+			width : 100%:;
+		}
+	}
+
+	.clear{
+		clear : both;
+	}
+	input.textarea {
+	    position: fixed;
+	    bottom: 0px;
+	    left: 20%;
+	    right: 0px;
+	    width: 80%;
+	    height: 50px;
+	    z-index: 99;
+	    background: #fafafa;
+	    border: none;
+	    outline: none;
+	    padding-left: 55px;
+	    padding-right: 55px;
+	    color: #666;
+	    font-weight: 400;
+	}
+</style>
+
+<div class="header">
+	<div class="left-header">
+		<div class="circle">
+			<i class="fa fa-comments"></i>
+		</div>
+		<div class="text">
+			<div class="level1">Chat</div>
+			<div class="detail">Msg</div>
+			<div class="clear"></div>
+		</div>
+		<div class="clear"></div>
+	</div>
+</div>
+<div class="main">
+	<div class="chat" rel="chat">
+		
+	</div>
+</div>
+<input class="textarea" type="text" id="content" placeholder="Type here!"/><div class="emojis"></div>
