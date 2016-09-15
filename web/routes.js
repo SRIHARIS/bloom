@@ -4,6 +4,7 @@ module.exports = function(app){
 		res.render('index');
 	});
 
+	/*
 	app.get('/chat', function (req, res) {
     	//compute data here
    	 	res.render('chat', {layout: false});
@@ -18,4 +19,5 @@ module.exports = function(app){
     	//compute data here
    	 	res.render('notes', {layout: false});
 	});
+	*/
 }
