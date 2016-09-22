@@ -2,9 +2,10 @@
   "name": "starlabs",
   "version": "1.0.0",
   "description": "Time to start",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": ""
   },
   "author": "Srihari",
   "license": "ISC",
@@ -16,5 +17,13 @@
     "hbs": "^4.0.0",
     "lodash": "^4.6.1",
     "mysql": "felixge/node-mysql"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^2.0.12",
+    "gulp-concat": "^2.6.0",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-sass": "^2.3.2",
+    "gulp-util": "^3.0.7"
   }
 }
