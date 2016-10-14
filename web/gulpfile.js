@@ -21,6 +21,12 @@ gulp.task('copy-template', function() {
     .pipe(gulp.dest('public/templates'));
 });
 
+gulp.task('copy-fonts', function() {
+  return gulp.src('source/fonts/**/*')
+    .pipe(gulp.dest('public/fonts'));
+});
+
+
 gulp.task('copy-angular', function() {
   return gulp.src('source/vendor_scripts/angular/*.js')
     .pipe(gulp.dest('public/javascript'));
@@ -30,7 +36,7 @@ gulp.task('build-vendor-js', function() {
   return gulp.src(['!source/vendor_scripts/angular/*.js','source/vendor_scripts/**/*.js'])
     .pipe(concat('bundle.js'))
       //only uglify if gulp is ran with '--type production'
-    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop()) 
+    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
     .pipe(gulp.dest('public/javascript'));
 });
 
@@ -38,12 +44,12 @@ gulp.task('build-js', function() {
   return gulp.src('source/js/**/*.js')
     .pipe(concat('scripts.js'))
       //only uglify if gulp is ran with '--type production'
-    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop()) 
+    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
     .pipe(gulp.dest('public/javascript'));
 });
 
 // define the default task and add the watch task to it
-gulp.task('default', ['watch','build-css','build-js','build-vendor-js','copy-template','copy-angular']);
+gulp.task('default', ['watch','build-css','build-js','build-vendor-js','copy-template','copy-angular','copy-fonts']);
 
 // configure which files to watch and what tasks to use on file changes
 gulp.task('watch', function() {

@@ -35,6 +35,16 @@ var storage = {
 	}
 }
 
+var progress_bar = {
+		show : function(){
+			jQuery('[rel="progress_bar"]').removeClass('hide');
+		},
+		hide : function() {
+			jQuery('[rel="progress_bar"]').addClass('hide');
+		}
+}
+
+
 controller_module.controller('chatCtrl',["$scope", function($scope) {
   //Set the menu item to active
   jQuery(".item").removeClass('active');
@@ -192,8 +202,13 @@ var file_stub = {
   bindEvents : function() {
       var self = this;
       jQuery('#file').on('change',function(ev) {
+          progress_bar.show();
           self.handleFileSelect(ev);
           jQuery(this).disabled = true;
+      });
+
+      jQuery("[rel=upload]").on('click',function(){
+          jQuery('#file').click();
       });
 
       auth.onAuthStateChanged(function(user) {
@@ -208,29 +223,36 @@ var file_stub = {
       });
   },
   populateFilesView : function() {
-        console.log('in')
+
+    if(location.href.indexOf("files") > -1) {
+
+        progress_bar.show();
         var ref = firebase.database().ref().child('files');
         ref.on("value", function(snapshot) {
           //console.log(snapshot.val());
-          var files = snapshot.val();
-           keys = _.keys(snapshot.val());
-           for(i =0;i<keys.length;i++){
-             var file = files[keys[i]];
-             console.log(file.url);
-             jQuery("[rel=blocks]").append('<a href="' + file.url + '"></a>');
+           var files = snapshot.val();
+           keys = _.keys(snapshot.val()).reverse();
+           jQuery("[rel=blocks]").empty();
 
-             $('[rel=blocks] a').embedly({
-               key: '45600eb833734f9a868ca8ff6966edd4',
-               query: {
-                 maxwidth: 530
+           var no_of_files = keys.length;
+           jQuery("[rel=file_count]").html(no_of_files + " files");
+
+           for(i =0;i<keys.length;i++) {
+               var file = files[keys[i]];
+               console.log(file);
+               if(file.url.indexOf('pdf') == -1) {
+                  jQuery("[rel=blocks]").append('<a href="' + file.url + '"></a>');
                }
-             });
-
            }
+           progress_bar.hide();
+           $('[rel=blocks] a').embedly({
+             key: '45600eb833734f9a868ca8ff6966edd4',
+             width: 400
+           });
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
         });
-
+    }
   },
   updateFileList : function(url) {
         // A post entry.
@@ -255,7 +277,7 @@ var file_stub = {
     // Push to child path.
     // [START oncomplete]
     storageRef.child('images/' + file.name).put(file, metadata).then(function(snapshot) {
-      console.log('Uploaded', snapshot.totalBytes, 'bytes.');
+      //console.log('Uploaded', snapshot.totalBytes, 'bytes.');
       console.log(snapshot.metadata);
       var url = snapshot.metadata.downloadURLs[0];
       console.log('File available at', url);
@@ -263,6 +285,7 @@ var file_stub = {
     }).catch(function(error) {
       // [START onfailure]
       console.error('Upload failed:', error);
+      progress_bar.hide();
       // [END onfailure]
     });
     // [END oncomplete]

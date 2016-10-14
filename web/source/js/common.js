@@ -13,3 +13,12 @@ var storage = {
 		}
 	}
 }
+
+var progress_bar = {
+		show : function(){
+			jQuery('[rel="progress_bar"]').removeClass('hide');
+		},
+		hide : function() {
+			jQuery('[rel="progress_bar"]').addClass('hide');
+		}
+}

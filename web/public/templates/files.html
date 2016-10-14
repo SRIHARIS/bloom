@@ -1,4 +1,3 @@
-
 <div class="header">
 	<div class="left-header">
 		<div class="circle">
@@ -6,43 +5,23 @@
 		</div>
 		<div class="text">
 			<div class="level1">Files</div>
-			<div class="detail">203 files</div>
-			<input type="file" id="file" name="file"/>
+			<div class="detail" rel="file_count"></div>
 			<div class="clear"></div>
 		</div>
 		<div class="clear"></div>
 	</div>
+	<div class="right-header">
+		  <a class="waves-effect btn-flat" rel="upload"><i class="material-icons right">library_add</i></a>
+			<input type="file" id="file" name="file" class="hide"/>
+	</div>
+	<div class="clear"></div>
+</div>
+<div rel="progress_bar" class="progress hide">
+		<div class="indeterminate"></div>
 </div>
 <div class="main">
-	<div class="chat" rel="chat">
-<!--
-      <div class="content">
-          <div class="mdl-card__supporting-text mdl-color-text--grey-600" id="messagesDiv">
-              <p>Select a file below. When it is uploaded, a link will be displayed to the uploaded file.</p>
-              <h6>Choose File</h6>
-              <input type="file" id="file" name="file"/>
-              <h6>File URL:</h6>
-              <span id="linkbox"></span>
-            </div>
-      </div> -->
-      <!--<div ng-cloak>
-        <md-content layout-padding>
-            <md-grid-list
-                md-cols-gt-md="12" md-cols="3" md-cols-md="3"
-                md-row-height-gt-md="1:1" md-row-height="4:3"
-                md-gutter-gt-md="16px" md-gutter-md="8px" md-gutter="4px">
-              <md-grid-tile
-                  ng-repeat="tile in colorTiles"
-                  ng-style="{
-                    'background': tile.color
-                  }"
-                  md-colspan-gt-sm="1"
-                  md-rowspan-gt-sm="1">
-              </md-grid-tile>
-            </md-grid-list>
-          </md-content> -->
-					<div rel="blocks">
-						
+	<div class="" rel="chat">
+					<div rel="blocks" id="columns">
 					</div>
         </div>
   	</div>
