@@ -9,7 +9,7 @@ var gulp  = require('gulp'),
     concatCss = require('gulp-concat-css');
 
 gulp.task('build-css', function() {
-  return gulp.src('source/css/**/*.css')
+  return gulp.src('source/css/**/*')
     .pipe(sass())
     .pipe(concatCss("bundle.css"))
     .pipe(cleanCSS({compatibility: 'ie8'}))
@@ -54,6 +54,6 @@ gulp.task('default', ['watch','build-css','build-js','build-vendor-js','copy-tem
 // configure which files to watch and what tasks to use on file changes
 gulp.task('watch', function() {
   gulp.watch('source/js/**/*.js',['build-js']);
-  gulp.watch('source/css/**/*.css', ['build-css']);
+  gulp.watch('source/css/**/*.scss', ['build-css']);
   gulp.watch('source/templates/**/*.html', ['copy-template']);
 });

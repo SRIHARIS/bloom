@@ -39,7 +39,7 @@ var file_stub = {
 
            for(i =0;i<keys.length;i++) {
                var file = files[keys[i]];
-               console.log(file);
+               //console.log(file);
                if(file.url.indexOf('pdf') == -1) {
                   jQuery("[rel=blocks]").append('<a href="' + file.url + '"></a>');
                }
@@ -64,6 +64,9 @@ var file_stub = {
 
         // Get a key for a new Post.
         var newPostKey = firebase.database().ref().child('files').push(postData).key;
+        if(!self.is_files_tab){
+            chat_stub.publish(url,true);
+        }
   },
   handleFileSelect : function(evt) {
     var self = this;
@@ -95,6 +98,9 @@ var file_stub = {
       auth = firebase.auth();
       storageRef = firebase.storage().ref();
       self.bindEvents();
-      self.populateFilesView();
+      self.is_files_tab = jQuery("[link=files]").hasClass('active');
+      if(self.is_files_tab) {
+          self.populateFilesView();
+      }
   }
 }

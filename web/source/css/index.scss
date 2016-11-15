@@ -1,5 +1,8 @@
+    @import 'theme';
+
     *{
       margin: 0;
+      padding: 0;
     }
 
     @font-face {
@@ -12,6 +15,7 @@
         width: 100%;
         height: 100%;
         font-family: roboto;
+        position: relative;
     }
 
     .progress{
@@ -20,16 +24,17 @@
     }
     .sidebar{
         width: 20%;
-        height: 100%;
-        background: #673E8C ;
-        min-height: 400px;
-        float: left;
+        position: absolute;
+        background: $sidebar ;
+        top : 0;
+        bottom : 0;
+        z-index: 10;
     }
 
     .sidebar .intro{
         text-align : center;
         padding: 60px 0;
-        background: #511F79;
+        background: $sidebar_intro;
     }
 
     .sidebar .intro .title{
@@ -103,7 +108,8 @@
         height: 100%;
         background: #F2EFF6;
         min-height: 400px;
-        float: left;
+        position: relative;
+        margin-left: 20%;
     }
 
     .content .header{
@@ -139,6 +145,7 @@
     @media only screen and (max-device-width: 480px) {
         div.content{
             width: 100%;
+            margin-left: 0px;
         }
 
         div.intro{
@@ -160,25 +167,37 @@
 
 
     /* Chat */
+    .main{
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .chat{
   		padding: 16px;
   		flex-direction: column;
   		display: flex;
-  		overflow-y: scroll;
-  		height: 500px;
   	}
+
+    .common_message_row {
+      display: flex;
+      flex-direction: column;
+      min-width: 100px;
+      max-width: 65%;
+      word-wrap: break-word;
+    }
 
   	.text_message.me {
   	    background: #fff;
-  	    padding: 4px 10px;
+  	    padding: 8px 10px;
   	    border-radius: 3px;
   	    margin: 4px 10px;
   	    box-shadow: 4px 4px 4px #efefef;
   	    font-size: 0.8rem;
   	    align-self: flex-start;
   	    position: relative;
+        @extend .common_message_row;
   	}
-
+    /*
   	.text_message.me:after {
   		content: '';
   		position: absolute;
@@ -191,7 +210,7 @@
   		margin-top: -8px;
   		left: -13px;
   		top: 50%;
-  	}
+  	} */
 
   	.text_message.other {
   	    background: #9E5DDF;
@@ -203,8 +222,16 @@
   	    font-size: 0.8rem;
   	    align-self: flex-end;
   	    position: relative;
+        @extend .common_message_row;
+        .time{
+            color : #fff;
+        }
   	}
-
+    .text_message img{
+        max-width: 100%;
+        height: auto;
+    }
+    /*
   	.text_message.other:after {
   		content: '';
   		position: absolute;
@@ -217,24 +244,37 @@
   		margin-top: -4px;
   		right: -7px;
   		top: 50%;
-  	}
+  	}  */
 
-  	input.textarea {
-  	    position: fixed;
-  	    bottom: 0px;
-  	    left: 20%;
-  	    right: 0px;
-  	    width: 80%;
-  	    height: 50px;
-  	    z-index: 99;
-  	    background: #fafafa;
-  	    border: none;
-  	    outline: none;
-  	    padding-left: 55px;
-  	    padding-right: 55px;
-  	    color: #666;
-  	    font-weight: 400;
-  	}
+    .time {
+        font-size: 0.5rem;
+        color : #333;
+        align-self: flex-end;
+        max-width: 70%;
+    }
+
+    .fixed_text{
+      position: absolute;
+      bottom: 10px;
+      padding: 5px;
+      left: 2%;
+      width: 96%;
+      background: #fff;
+      border: none;
+      outline: none;
+      color: #333;
+      font-size: 0.8rem;
+    }
+
+    .date_seperator {
+        width: 100px;
+        padding: 3px;
+        background: white;
+        font-size: 0.8rem;
+        border-radius: 13px;
+        text-align: center;
+        margin: 10px auto;
+    }
 
     /* Files */
 

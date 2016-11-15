@@ -1,45 +1,66 @@
 var chat_stub  = {
-	channel : 'politecheese',
-	subscribe : function() { 
+	channel : 'politecheese_1',
+	subscribe : function() {
 			var self = this;
 			pubnub.addListener({
 		        status: function(statusEvent) {
 		            if (statusEvent.category === "PNConnectedCategory") {
 		                //self.publish();
+										var newState = {
+					                name: storage.get("uuid"),
+					                timestamp: new Date()
+					          };
+
+				            pubnub.setState(
+				                {
+				                    channels: ["politecheese_1"],
+				                    state: newState
+				                }
+				            );
 		            }
 		        },
 		        message: function(packet) {
-		            console.log("New Message!!", packet);
+		            //console.log("New Message!!", packet);
 		            self.addMessage(packet.message);
 		        },
 		        presence: function(presenceEvent) {
 		            // handle presence
+								console.log(presenceEvent);
 		        }
-		    })      
-		    console.log("Subscribing..");
+		    })
+		    //console.log("Subscribing..");
 		    pubnub.subscribe({
-		        channels: [self.channel] 
+		        channels: [self.channel],
+						withPresence: true,
+						timeout : 10
 		    });
 	},
-	publish : function() {
+	publish : function(data,is_file) {
 		//console.log("Since we're publishing on subscribe connectEvent, we're sure we'll receive the following publish.");
 		var self = this;
 		var message = jQuery('#content').val();
+		var d = new Date();
+		//d.setDate(d.getDate()-10);
 		var packet = {
-			content : message,
-			sender : storage.get("uuid")
+			content : data,
+			sender : storage.get("uuid"),
+			time : d,
+			timezone_offset : (new Date()).getTimezoneOffset()
+		};
+		if(is_file) {
+			packet.is_file = true;
 		}
-        var publishConfig = {
-            channel : this.channel,
-            message : packet
-        };
+    var publishConfig = {
+        channel : this.channel,
+        message : packet
+    };
 
-        pubnub.publish(publishConfig, function(status, response) {
-            console.log(status,response);
-            if(status.statusCode == 200){
-            	jQuery('#content').val('');
-            }
-        });
+    pubnub.publish(publishConfig, function(status, response) {
+        //console.log(status,response);
+        if(status.statusCode == 200){
+        	jQuery('#content').val('');
+        }
+    });
 	},
 	connect : function(uuid) {
 		pubnub = new PubNub({
@@ -51,13 +72,12 @@ var chat_stub  = {
 		this.getHistory();
 	},
 	bindEvents : function() {
-		console.log('ok')
+		//console.log('ok')
 		var self = this;
 		$(document).on("#login",'click',function(){
-			console.log('fine')
+			//console.log('fine')
 			var username = jQuery("#recipient-name").val();
 			if(username != undefined && username != '') {
-				console.log('fck')
 				$("#usermodel").modal('hide');
 				self.connect(username);
 				storage.set("uuid",username);
@@ -66,23 +86,34 @@ var chat_stub  = {
 
 		$(document).keypress(function(e) {
 		    if(e.which == 13) {
-		        self.publish();
+		        self.publish(jQuery('#content').val(),false);
 		    }
 		});
+
+
 	},
 	init : function() {
 		var self = this;
+		//storage.set("uuid","harika");
 		var value = storage.get("uuid");
 		self.bindEvents();
 		//if(!value) {
 		    //$("#usermodel").modal('show');
 		//} else {
-		    self.connect(value);	
+		    self.connect(value);
 		//}
 	},
 	addMessage : function(message) {
 		var self = this;
-		$("[rel=chat]").append(self.getEntryMarkup(message));
+		var date = new Date(message.time);
+		var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+		var markup = self.getEntryMarkup(message);
+
+		if(!self.sorted_messages.hasOwnProperty(key)) {
+			$("[rel=chat]").append('<div class="date_seperator">' + moment(date).format('Do MMM') + '</div>');
+		}
+
+		$("[rel=chat]").append(markup);
 		/*
 		$('html, body').animate({
             scrollTop: $("[rel=chat]").offset().bottom
@@ -92,25 +123,56 @@ var chat_stub  = {
 	addListOfMessages : function(messages) {
 		var list = '';
 		var self = this;
-
+		self.sorted_messages = {};
 		$.each(messages,function(idx,el) {
-			console.log(el);
-			if(jQuery.isPlainObject(el.entry)){
-				list += self.getEntryMarkup(el.entry);	
+			if(jQuery.isPlainObject(el.entry)) {
+				//console.log(el.entry)
+				var date = new Date(el.entry.time);
+				var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+				if(!self.sorted_messages.hasOwnProperty(key)) {
+					self.sorted_messages[key] = [];
+				}
+				//list += self.getEntryMarkup(el.entry);
+				self.sorted_messages[key].push(self.getEntryMarkup(el.entry))
 			}
 		});
+		$.each(_.keys(self.sorted_messages),function(idx,el) {
+				list += '<div class="date_seperator">' + moment(el).format('Do MMM') + '</div>';
+				$.each(self.sorted_messages[el],function(i,markup) {
+						list += markup;
+				});
+		});
+
 		$("[rel=chat]").append(list);
 	},
 	getEntryMarkup : function(message) {
+
 		var current_user = storage.get("uuid");
-		if(current_user == message.sender){
-			var tmpl = '<div class="text_message me">';
-		    tmpl += '' + message.content + '';
-		    tmpl +=	'</div>';
+		var time = moment(message.time).format('h:mm a');
+		var tmpl = '';
+		if(message.is_file == undefined || !message.is_file) {
+			if(current_user == message.sender){
+				  tmpl = '<div class="text_message me">';
+					tmpl += '' + message.content + '<div class="time">' + time +'</div>';
+					tmpl +=	'</div>';
+			} else {
+				  tmpl = '<div class="text_message other">';
+					tmpl += '' + message.content + '<div class="time">' + time +'</div>';
+					tmpl +=	'</div>';
+			}
 		} else {
-			var tmpl = '<div class="text_message other">';
-		    tmpl += '' + message.content + '';
-		    tmpl +=	'</div>';
+			if(current_user == message.sender) {
+					tmpl = '<div class="text_message me">';
+					tmpl += '<a target="_blank" href="' + message.content + '">' +'<img class="file_preview" style="" src="' + message.content + '"></img></a>';
+					tmpl += '<div class="time">' + time +'</div>';
+					tmpl +=	'</div>';
+			} else {
+					tmpl = '<div class="text_message other">';
+					tmpl += '<a target="_blank" href="' + message.content + '">' +'<img class="file_preview" style="" src="' + message.content + '"></img></a>';
+					tmpl += '<div class="time">' + time +'</div>';
+					tmpl +=	'</div>';
+			}
+
 		}
 		return tmpl;
 	},
@@ -119,8 +181,8 @@ var chat_stub  = {
 		pubnub.history({
 	        channel: self.channel,
 	        reverse: true, // true to send via post
-	        count: 100, // how many items to fetch
-	        includeTimetoken: true // include time token for each item.
+	        count: 100 ,// how many items to fetch,
+					'stringifiedTimeToken' : true,
 	    },
 	    function (status, response) {
 	        // handle status, response
