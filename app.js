@@ -13,6 +13,7 @@ var options = {
     cert: fs.readFileSync('./ssl/localhost.cert'),
 };
 */
+app.set('port', (process.env.PORT || 5000));
 app.engine('hbs',engines.handlebars);
 app.set('views','./views');
 app.use('/asset',express.static(__dirname + '/public'));
@@ -32,5 +33,8 @@ app.use(function(req, res, next) {
 
 var routes = require('./routes')(app);
 
-http.createServer(app).listen(3001);
-//https.createServer(options, app).listen(1443); 
+//http.createServer(app).listen(app.get('port'));
+//https.createServer(options, app).listen(1443);
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
+});
