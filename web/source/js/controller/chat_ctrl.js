@@ -5,6 +5,7 @@ controller_module.controller('chatCtrl',["$scope", function($scope) {
   jQuery('[link=chat]').addClass('active');
   chat_stub.init();
   file_stub.init();
+
   var window_height = jQuery(window).height();
   jQuery(".main").height(window_height - 120);
 }]);

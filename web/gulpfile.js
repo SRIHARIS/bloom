@@ -5,7 +5,9 @@ var gulp  = require('gulp'),
     gutil = require('gulp-util'),
     sass   = require('gulp-sass'),
     concat = require('gulp-concat'),
+    uglify = require('gulp-uglify'),
     cleanCSS = require('gulp-clean-css'),
+    minify = require('gulp-minify'),
     concatCss = require('gulp-concat-css');
 
 gulp.task('build-css', function() {
@@ -36,7 +38,10 @@ gulp.task('build-vendor-js', function() {
   return gulp.src(['!source/vendor_scripts/angular/*.js','source/vendor_scripts/**/*.js'])
     .pipe(concat('bundle.js'))
       //only uglify if gulp is ran with '--type production'
-    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
+    .pipe(gulp.dest('public/javascript'))
+    .pipe(uglify())
+    .pipe(gulp.dest('public/javascript'))
+    .pipe(minify())
     .pipe(gulp.dest('public/javascript'));
 });
 

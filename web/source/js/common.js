@@ -22,3 +22,10 @@ var progress_bar = {
 			jQuery('[rel="progress_bar"]').addClass('hide');
 		}
 }
+
+$(function() {
+	$(window).resize(function(){
+		var window_height = jQuery(window).height();
+	  jQuery(".main").height(window_height - 120);
+	});
+});

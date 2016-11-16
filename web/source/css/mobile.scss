@@ -1,0 +1,57 @@
+  @import 'theme';
+
+  @media only screen and (max-device-width: 480px) {
+      div.content {
+          width: 100%;
+          margin-left: 0px;
+          background: $content_back_mobile;
+          .header{
+              background: $header_back_mobile;
+              position: fixed;
+              width: 100%;
+              z-index: 100;
+
+              .circle{
+                border-color: #fff;
+              }
+              .circle i{
+                  color : #fff;
+              }
+              .left-header {
+                .level1 {
+                  color : #fff;
+                }
+                .detail{
+                  color : #B2DFDB;
+                }
+            }
+          }
+
+          .main {
+            top : 70px;
+            position: relative;
+          }
+      }
+      .footer_controls{
+        position: fixed;
+      }
+      div.intro{
+          display: none;
+      }
+
+      div.sidebar{
+        display: none;
+      }
+
+      .text_message {
+          &.me {
+              background: $text_message_me_back_mobile;
+              color : $text_message_me_font_color_mobile;
+          }
+
+          &.other {
+        	    background: $text_message_other_back_mobile;
+        	    color: $text_message_other_font_color_mobile;
+        	}
+      }
+  }

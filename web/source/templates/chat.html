@@ -5,14 +5,13 @@
 		</div>
 		<div class="text">
 			<div class="level1">Chat</div>
-			<div class="detail"></div>
+			<div class="detail" rel="status"></div>
 			<div class="clear"></div>
 		</div>
 		<div class="clear"></div>
 	</div>
 	<div class="right-header">
-		  <a class="waves-effect btn-flat" rel="upload"><i class="material-icons right">library_add</i></a>
-			<input type="file" id="file" name="file" class="hide"/>
+
 	</div>
 	<div class="clear">
 	</div>
@@ -22,4 +21,41 @@
 
 	</div>
 </div>
-<input class="fixed_text" type="text" id="content" placeholder="Type here"/></div>
+<div class="footer_controls">
+		<a class="upload" rel="upload"><i class="fa fa-plus"></i></a>
+		<textarea class="fixed_text" id="content" placeholder="Enter text"/>
+		<input type="file" id="file" name="file" class="hide"/>
+</div>
+
+</div>
+<!-- Templates -->
+<script id="chat_my_message" type="text/x-handlebars-template">
+	<div class="text_message me" data-time="{{time_stamp}}">
+			{{content}}
+			<div class="time">{{time}}</div>
+	</div>
+</script>
+<script id="chat_other_message" type="text/x-handlebars-template">
+	<div class="text_message other" data-time="{{time_stamp}}">
+			{{content}}
+			<div class="time">{{time}}</div>
+	</div>
+</script>
+
+<script id="chat_my_message_file" type="text/x-handlebars-template">
+	<div class="text_message me" data-time="{{time_stamp}}">
+			<a target="_blank" href="{{content}}">
+					<img class="file_preview lazy" data-original="{{content}}"></img>
+			</a>
+			<div class="time">{{time}}</div>
+	</div>
+</script>
+
+<script id="chat_other_message_file" type="text/x-handlebars-template">
+	<div class="text_message other" data-time="{{time_stamp}}">
+			<a target="_blank" href="{{content}}">
+					<img class="file_preview lazy" data-original="{{content}}"></img>
+			</a>
+			<div class="time">{{time}}</div>
+	</div>
+</script>

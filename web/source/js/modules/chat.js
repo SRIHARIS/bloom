@@ -21,11 +21,18 @@ var chat_stub  = {
 		        },
 		        message: function(packet) {
 		            //console.log("New Message!!", packet);
-		            self.addMessage(packet.message);
+		            self.addMessage(packet);
 		        },
 		        presence: function(presenceEvent) {
 		            // handle presence
-								console.log(presenceEvent);
+								// console.log(presenceEvent);
+								if(presenceEvent.action === 'state-change') {
+				            if(presenceEvent.state &&  presenceEvent.state.isTyping == true && presenceEvent.uuid != self.uuid ) {
+												//$("[rel=status]").html(presenceEvent.uuid + ' is typing...');
+				            } else {
+												//$("[rel=status]").html("");
+										}
+				        }
 		        }
 		    })
 		    //console.log("Subscribing..");
@@ -39,13 +46,10 @@ var chat_stub  = {
 		//console.log("Since we're publishing on subscribe connectEvent, we're sure we'll receive the following publish.");
 		var self = this;
 		var message = jQuery('#content').val();
-		var d = new Date();
 		//d.setDate(d.getDate()-10);
 		var packet = {
 			content : data,
-			sender : storage.get("uuid"),
-			time : d,
-			timezone_offset : (new Date()).getTimezoneOffset()
+			sender : storage.get("uuid")
 		};
 		if(is_file) {
 			packet.is_file = true;
@@ -62,7 +66,26 @@ var chat_stub  = {
         }
     });
 	},
+	publish_status : function(name,value){
+		var self = this;
+		var state = {};
+		state[name] = value;
+		var channels = [];
+
+		channels.push(self.channel);
+
+		pubnub.setState(
+			{
+					state: state,
+					channels: channels
+			},
+			function (status, response) {
+					// handle status, response
+			}
+			);
+	},
 	connect : function(uuid) {
+		self.uuid = uuid;
 		pubnub = new PubNub({
 		        publishKey : 'pub-c-5d1f44f3-e3b1-405d-8d3e-68c351dd4239',
 		        subscribeKey : 'sub-c-319e8f88-7772-11e6-9717-0619f8945a4f',
@@ -90,6 +113,17 @@ var chat_stub  = {
 		    }
 		});
 
+		var $input = $('#content');
+
+		//on keyup, start the countdown
+		$input.on('keyup', function () {
+			self.publish_status('isTyping',true);
+		});
+
+		$input.keyup(_.debounce(function() {
+			console.log('stopped typing');
+			self.publish_status('isTyping',false);
+		},3000));
 
 	},
 	init : function() {
@@ -97,43 +131,43 @@ var chat_stub  = {
 		//storage.set("uuid","harika");
 		var value = storage.get("uuid");
 		self.bindEvents();
+		self.precompileTemplates();
 		//if(!value) {
 		    //$("#usermodel").modal('show');
 		//} else {
 		    self.connect(value);
 		//}
 	},
-	addMessage : function(message) {
+	addMessage : function(packet) {
 		var self = this;
-		var date = new Date(message.time);
+		var date = new Date(packet.timetoken/1e4);
 		var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-		var markup = self.getEntryMarkup(message);
+		var markup = self.getEntryMarkup(packet);
 
 		if(!self.sorted_messages.hasOwnProperty(key)) {
 			$("[rel=chat]").append('<div class="date_seperator">' + moment(date).format('Do MMM') + '</div>');
 		}
 
 		$("[rel=chat]").append(markup);
-		/*
-		$('html, body').animate({
-            scrollTop: $("[rel=chat]").offset().bottom
-        }, 2000);
-        */
+		$("img.lazy").lazyload();
+		self.focusLastMessage();
+		self.populateLastMessageTime(packet.timetoken);
 	},
 	addListOfMessages : function(messages) {
 		var list = '';
 		var self = this;
+		var last_message_time = 0;
 		self.sorted_messages = {};
 		$.each(messages,function(idx,el) {
 			if(jQuery.isPlainObject(el.entry)) {
-				//console.log(el.entry)
-				var date = new Date(el.entry.time);
+				last_message_time = el.timetoken;
+				var date = new Date(el.timetoken/1e4);
 				var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 				if(!self.sorted_messages.hasOwnProperty(key)) {
 					self.sorted_messages[key] = [];
 				}
 				//list += self.getEntryMarkup(el.entry);
-				self.sorted_messages[key].push(self.getEntryMarkup(el.entry))
+				self.sorted_messages[key].push(self.getEntryMarkup(el))
 			}
 		});
 		$.each(_.keys(self.sorted_messages),function(idx,el) {
@@ -144,37 +178,51 @@ var chat_stub  = {
 		});
 
 		$("[rel=chat]").append(list);
+		$("img.lazy").lazyload({
+			container: $("[rel=chat]"),
+			effect : 'fadeIn',
+			load :function() {
+			}
+		});
+		self.populateLastMessageTime(last_message_time);
+		self.focusLastMessage();
 	},
-	getEntryMarkup : function(message) {
-
+	getEntryMarkup : function(packet) {
+		var self = this;
+		var message = packet.entry || packet.message;
 		var current_user = storage.get("uuid");
-		var time = moment(message.time).format('h:mm a');
+		var time = moment(new Date(packet.timetoken/1e4)).format('h:mm a');
 		var tmpl = '';
 		if(message.is_file == undefined || !message.is_file) {
 			if(current_user == message.sender){
-				  tmpl = '<div class="text_message me">';
-					tmpl += '' + message.content + '<div class="time">' + time +'</div>';
-					tmpl +=	'</div>';
+					tmpl = self.my_text_template({ content : message.content ,time:time,time_stamp:message.time });
 			} else {
-				  tmpl = '<div class="text_message other">';
-					tmpl += '' + message.content + '<div class="time">' + time +'</div>';
-					tmpl +=	'</div>';
+				  tmpl = self.other_text_template({ content : message.content ,time:time,time_stamp:message.time });
 			}
 		} else {
 			if(current_user == message.sender) {
-					tmpl = '<div class="text_message me">';
-					tmpl += '<a target="_blank" href="' + message.content + '">' +'<img class="file_preview" style="" src="' + message.content + '"></img></a>';
-					tmpl += '<div class="time">' + time +'</div>';
-					tmpl +=	'</div>';
+					tmpl = self.my_file_template({ content : message.content ,time:time,time_stamp:message.time });
 			} else {
-					tmpl = '<div class="text_message other">';
-					tmpl += '<a target="_blank" href="' + message.content + '">' +'<img class="file_preview" style="" src="' + message.content + '"></img></a>';
-					tmpl += '<div class="time">' + time +'</div>';
-					tmpl +=	'</div>';
+					tmpl = self.other_file_template({ content : message.content ,time:time,time_stamp:message.time });
 			}
 
 		}
 		return tmpl;
+	},
+	precompileTemplates : function(){
+		var self = this;
+		var source   = $("#chat_other_message").html();
+		self.other_text_template = Handlebars.compile(source);
+
+		source   = $("#chat_my_message").html();
+		self.my_text_template = Handlebars.compile(source);
+
+		source   = $("#chat_other_message_file").html();
+		self.other_file_template = Handlebars.compile(source);
+
+		source   = $("#chat_my_message_file").html();
+		self.my_file_template = Handlebars.compile(source);
+
 	},
 	getHistory : function() {
 		var self = this;
@@ -190,6 +238,22 @@ var chat_stub  = {
 	        	self.addListOfMessages(response.messages);
 	        }
 	    });
+	},
+	focusLastMessage : function(){
+		var trueDivHeight = $('.main')[0].scrollHeight;
+		var divHeight = $('.main').height();
+		$('.main').animate({
+            scrollTop: trueDivHeight - divHeight + 200
+        }, 1000);
+
+	},
+	populateLastMessageTime : function(time){
+			var self = this;
+			jQuery("[rel=status]").html(self.getHumanDate(time));
+	},
+	getHumanDate : function(time) {
+		var date = new Date(time/1e4);
+		return moment(date).calendar();
 	}
 };
 
