@@ -228,8 +228,8 @@ var chat_stub  = {
 		var self = this;
 		pubnub.history({
 	        channel: self.channel,
-	        reverse: true, // true to send via post
-	        count: 100 ,// how many items to fetch,
+	        reverse: false, // true to send via post
+	        count: 10 ,// how many items to fetch,
 					'stringifiedTimeToken' : true,
 	    },
 	    function (status, response) {
@@ -249,7 +249,12 @@ var chat_stub  = {
 	},
 	populateLastMessageTime : function(time){
 			var self = this;
-			jQuery("[rel=status]").html(self.getHumanDate(time));
+			if(time != 0) {
+				jQuery("[rel=status]").html(self.getHumanDate(time));
+			} else {
+				jQuery("[rel=status]").html("0 Messages");
+			}
+
 	},
 	getHumanDate : function(time) {
 		var date = new Date(time/1e4);

@@ -17,6 +17,7 @@ app.set('port', (process.env.PORT || 5000));
 app.engine('hbs',engines.handlebars);
 app.set('views','./views');
 app.use('/asset',express.static(__dirname + '/public'));
+app.use('/node_modules',express.static(__dirname + '/node_modules'));
 app.set('view engine','hbs');
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies

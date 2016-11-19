@@ -1,23 +1,64 @@
-var app = angular.module('bloom',['labs.controllers','ngRoute','ngMaterial']);
+var app = angular.module('bloom',['labs.controllers','ngRoute','auth0.lock', 'angular-jwt']);
 
 app.
-  config(['$locationProvider', '$routeProvider',
-    function config($locationProvider, $routeProvider) {
+  config(['$locationProvider', '$routeProvider','lockProvider',
+    function config($locationProvider, $routeProvider,lockProvider) {
 
       $routeProvider.
         when('/chat', {
           templateUrl : 'asset/templates/chat.html',
-          controller : 'chatCtrl'
+          controller : 'chatCtrl',
+          controllerAs: 'vm' 
         }).
         when('/files', {
           templateUrl : 'asset/templates/files.html',
-          controller : 'filesCtrl'
+          controller : 'filesCtrl',
+          controllerAs: 'vm'
+        }).
+        when('/login', {
+          templateUrl : 'asset/templates/login.html',
+          controller : 'login_ctrl',
+          controllerAs: 'vm'
         }).
         otherwise('/chat');
+
+        lockProvider.init({
+          clientID: AUTH0_CLIENT_ID,
+          domain: AUTH0_DOMAIN
+        });
     }
   ]);
 
 var controller_module = angular.module('labs.controllers', []);
+
+(function () {
+  
+  'use strict';
+
+  angular
+    .module('bloom')
+    .run(run);
+
+  run.$inject = ['$rootScope', 'authService', 'lock'];
+
+  function run($rootScope, authService, lock) {
+    // Put the authService on $rootScope so its methods
+    // can be accessed from the nav bar
+    $rootScope.authService = authService;
+
+    // Register the authentication listener that is
+    // set up in auth.service.js
+    authService.registerAuthenticationListener();
+
+    // Register the synchronous hash parser
+    lock.interceptHash();
+  }
+  
+})();
+
+var AUTH0_CLIENT_ID='rtbHpAVrGNPYLcosmTvBlPrWBjhmRw8Y'; 
+var AUTH0_DOMAIN='stealth007.auth0.com'; 
+var AUTH0_CALLBACK_URL='http://localhost:8080/#/home';
 
 var storage = {
 	store : function(key,value) {
@@ -51,8 +92,48 @@ $(function() {
 	});
 });
 
+(function () {
 
-controller_module.controller('chatCtrl',["$scope", function($scope) {
+  'use strict';
+
+  angular
+    .module('bloom')
+    .service('authService', authService);
+
+  authService.$inject = ['lock', 'authManager'];
+
+  function authService(lock, authManager) {
+
+    function login() {
+      lock.show();
+    }
+
+    // Logging out just requires removing the user's
+    // id_token and profile
+    function logout() {
+      localStorage.removeItem('id_token');
+      authManager.unauthenticate();
+    }
+
+    // Set up the logic for when a user authenticates
+    // This method is called from app.run.js
+    function registerAuthenticationListener() {
+      lock.on('authenticated', function (authResult) {
+        localStorage.setItem('id_token', authResult.idToken);
+        authManager.authenticate();
+      });
+    }
+
+    return {
+      login: login,
+      logout: logout,
+      registerAuthenticationListener: registerAuthenticationListener
+    }
+  }
+})();
+
+
+controller_module.controller('chatCtrl',["$scope", 'authService',function($scope,authService) {
   //Set the menu item to active
   jQuery(".item").removeClass('active');
   jQuery('[link=chat]').addClass('active');
@@ -61,6 +142,14 @@ controller_module.controller('chatCtrl',["$scope", function($scope) {
 
   var window_height = jQuery(window).height();
   jQuery(".main").height(window_height - 120);
+
+  var vm = this;
+  vm.authService = authService;
+
+  if(!$scope.isAuthenticated) {
+  		vm.authService.login();
+  }
+  //console.log($scope.isAuthenticated);
 }]);
 
 
@@ -71,6 +160,12 @@ controller_module.controller('filesCtrl',["$scope", function($scope) {
     file_stub.init();
     var window_height = jQuery(window).height();
     jQuery(".main").height(window_height-60);
+}]);
+
+
+controller_module.controller('login_ctrl',["$scope", 'authService',function($scope,authService) {
+	var vm = this;
+  	vm.authService = authService;
 }]);
 
 
@@ -304,8 +399,8 @@ var chat_stub  = {
 		var self = this;
 		pubnub.history({
 	        channel: self.channel,
-	        reverse: true, // true to send via post
-	        count: 100 ,// how many items to fetch,
+	        reverse: false, // true to send via post
+	        count: 10 ,// how many items to fetch,
 					'stringifiedTimeToken' : true,
 	    },
 	    function (status, response) {
@@ -325,7 +420,12 @@ var chat_stub  = {
 	},
 	populateLastMessageTime : function(time){
 			var self = this;
-			jQuery("[rel=status]").html(self.getHumanDate(time));
+			if(time != 0) {
+				jQuery("[rel=status]").html(self.getHumanDate(time));
+			} else {
+				jQuery("[rel=status]").html("0 Messages");
+			}
+
 	},
 	getHumanDate : function(time) {
 		var date = new Date(time/1e4);
