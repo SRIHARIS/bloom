@@ -35,12 +35,12 @@ gulp.task('copy-angular', function() {
 });
 
 gulp.task('copy-auth0', function() {
-  return gulp.src('source/auth0-variables.js')
+  return gulp.src('source/js/auth0-variables.js')
     .pipe(gulp.dest('public/javascript'));
 });
 
 gulp.task('build-vendor-js', function() {
-  return gulp.src(['!source/vendor_scripts/angular/*.js','source/vendor_scripts/**/*.js','!source/autho0-variables.js'])
+  return gulp.src(['!source/vendor_scripts/angular/*.js','source/vendor_scripts/**/*.js','!source/auth0-variables.js'])
     .pipe(concat('bundle.js'))
       //only uglify if gulp is ran with '--type production'
     .pipe(gulp.dest('public/javascript'))

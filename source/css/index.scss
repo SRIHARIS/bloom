@@ -133,6 +133,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        position: relative;
     }
     .content .header .left-header .text{
         float: left;
@@ -169,6 +170,19 @@
   		display: flex;
       margin-bottom: 50px;
   	}
+
+    .unread {
+        background: #d65050 none repeat scroll 0 0;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 0.5rem;
+        padding: 4px;
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        width: 10px;
+        height: 10px;
+    }
 
     .common_message_row {
       display: flex;

@@ -20,17 +20,16 @@ var chat_stub  = {
 		            }
 		        },
 		        message: function(packet) {
-		            //console.log("New Message!!", packet);
 		            self.addMessage(packet);
 		        },
 		        presence: function(presenceEvent) {
 		            // handle presence
 								// console.log(presenceEvent);
 								if(presenceEvent.action === 'state-change') {
-				            if(presenceEvent.state &&  presenceEvent.state.isTyping == true && presenceEvent.uuid != self.uuid ) {
-												//$("[rel=status]").html(presenceEvent.uuid + ' is typing...');
+				            if(presenceEvent.state &&  presenceEvent.state.isTyping == true && presenceEvent.uuid != self.profile.nickname ) {
+												$("[rel=status]").html(presenceEvent.uuid + ' is typing...');
 				            } else {
-												//$("[rel=status]").html("");
+												$("[rel=status]").html("");
 										}
 				        }
 		        }
@@ -39,7 +38,7 @@ var chat_stub  = {
 		    pubnub.subscribe({
 		        channels: [self.channel],
 						withPresence: true,
-						timeout : 10
+						timeout : 50
 		    });
 	},
 	publish : function(data,is_file) {
@@ -49,7 +48,7 @@ var chat_stub  = {
 		//d.setDate(d.getDate()-10);
 		var packet = {
 			content : data,
-			sender : storage.get("uuid")
+			sender : self.profile.nickname
 		};
 		if(is_file) {
 			packet.is_file = true;
@@ -97,19 +96,15 @@ var chat_stub  = {
 	bindEvents : function() {
 		//console.log('ok')
 		var self = this;
-		$(document).on("#login",'click',function(){
-			//console.log('fine')
-			var username = jQuery("#recipient-name").val();
-			if(username != undefined && username != '') {
-				$("#usermodel").modal('hide');
-				self.connect(username);
-				storage.set("uuid",username);
-			}
-		});
+		$(document).off(".chat_event");
 
-		$(document).keypress(function(e) {
+		$(document).on('keypress.chat_event',function(e) {
 		    if(e.which == 13) {
-		        self.publish(jQuery('#content').val(),false);
+						var content = jQuery('#content').val();
+						if(content != undefined && content.length > 0) {
+								self.publish(content,false);
+						}
+
 		    }
 		});
 
@@ -120,23 +115,19 @@ var chat_stub  = {
 			self.publish_status('isTyping',true);
 		});
 
-		$input.keyup(_.debounce(function() {
-			console.log('stopped typing');
+		$input.on("keyup.chat_event",_.debounce(function() {
+			//console.log('stopped typing');
 			self.publish_status('isTyping',false);
 		},3000));
 
 	},
-	init : function() {
+	init : function(profile_param) {
 		var self = this;
-		//storage.set("uuid","harika");
-		var value = storage.get("uuid");
+		self.profile = profile_param;
+		self.unread_count = 0;
 		self.bindEvents();
 		self.precompileTemplates();
-		//if(!value) {
-		    //$("#usermodel").modal('show');
-		//} else {
-		    self.connect(value);
-		//}
+		self.connect(profile_param.nickname);
 	},
 	addMessage : function(packet) {
 		var self = this;
@@ -152,6 +143,20 @@ var chat_stub  = {
 		$("img.lazy").lazyload();
 		self.focusLastMessage();
 		self.populateLastMessageTime(packet.timetoken);
+
+		if(packet.message.sender != self.profile.nickname) {
+
+			if(document.hidden) {
+				self.unread_count += 1;
+			}
+
+			if(self.unread_count > 0) {
+				jQuery("[rel=unread_count]").html(self.unread_count).removeClass('hide');
+			}else{
+				jQuery("[rel=unread_count]").addClass('hide');
+			}
+		}
+
 	},
 	addListOfMessages : function(messages) {
 		var list = '';
@@ -159,7 +164,7 @@ var chat_stub  = {
 		var last_message_time = 0;
 		self.sorted_messages = {};
 		$.each(messages,function(idx,el) {
-			if(jQuery.isPlainObject(el.entry)) {
+			if(jQuery.isPlainObject(el.entry) && el.entry.content != "") {
 				last_message_time = el.timetoken;
 				var date = new Date(el.timetoken/1e4);
 				var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
@@ -239,7 +244,7 @@ var chat_stub  = {
 	        }
 	    });
 	},
-	focusLastMessage : function(){
+	focusLastMessage : function() {
 		var trueDivHeight = $('.main')[0].scrollHeight;
 		var divHeight = $('.main').height();
 		$('.main').animate({

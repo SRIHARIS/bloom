@@ -3,8 +3,6 @@ controller_module.controller('chatCtrl',["$scope", 'authService',function($scope
   //Set the menu item to active
   jQuery(".item").removeClass('active');
   jQuery('[link=chat]').addClass('active');
-  chat_stub.init();
-  file_stub.init();
 
   var window_height = jQuery(window).height();
   jQuery(".main").height(window_height - 120);
@@ -15,5 +13,11 @@ controller_module.controller('chatCtrl',["$scope", 'authService',function($scope
   if(!$scope.isAuthenticated) {
   		vm.authService.login();
   }
-  //console.log($scope.isAuthenticated);
+
+  authService.getProfileDeferred().then(function (profile) {
+        vm.profile = profile;
+        chat_stub.init(profile);
+        file_stub.init();
+  });
+  console.log($scope.isAuthenticated);
 }]);

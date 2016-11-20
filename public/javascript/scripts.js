@@ -1,14 +1,23 @@
 var app = angular.module('bloom',['labs.controllers','ngRoute','auth0.lock', 'angular-jwt']);
 
 app.
-  config(['$locationProvider', '$routeProvider','lockProvider',
-    function config($locationProvider, $routeProvider,lockProvider) {
+  config(['$httpProvider','$locationProvider', '$routeProvider','lockProvider','jwtOptionsProvider',
+    function config($httpProvider,$locationProvider, $routeProvider,lockProvider,jwtOptionsProvider) {
+      var options = {
+        allowSignUp: false,
+        closable: false,
+        theme: {
+          logo: 'http://stealth007.herokuapp.com/asset/images/logo.png',
+          primaryColor: '#673E8C'
+        },
+        allowForgotPassword: false
 
+      };
       $routeProvider.
         when('/chat', {
           templateUrl : 'asset/templates/chat.html',
           controller : 'chatCtrl',
-          controllerAs: 'vm' 
+          controllerAs: 'vm'
         }).
         when('/files', {
           templateUrl : 'asset/templates/files.html',
@@ -24,24 +33,33 @@ app.
 
         lockProvider.init({
           clientID: AUTH0_CLIENT_ID,
-          domain: AUTH0_DOMAIN
+          domain: AUTH0_DOMAIN,
+          options : options
         });
+        
+        jwtOptionsProvider.config({
+          tokenGetter: function () {
+            return localStorage.getItem('id_token');
+          }
+        });
+
+        $httpProvider.interceptors.push('jwtInterceptor');
     }
   ]);
 
 var controller_module = angular.module('labs.controllers', []);
 
 (function () {
-  
+
   'use strict';
 
   angular
     .module('bloom')
     .run(run);
 
-  run.$inject = ['$rootScope', 'authService', 'lock'];
+  run.$inject = ['$rootScope', 'authService', 'lock','authManager'];
 
-  function run($rootScope, authService, lock) {
+  function run($rootScope, authService, lock,authManager) {
     // Put the authService on $rootScope so its methods
     // can be accessed from the nav bar
     $rootScope.authService = authService;
@@ -52,13 +70,15 @@ var controller_module = angular.module('labs.controllers', []);
 
     // Register the synchronous hash parser
     lock.interceptHash();
+
+    authManager.checkAuthOnRefresh();
   }
-  
+
 })();
 
-var AUTH0_CLIENT_ID='rtbHpAVrGNPYLcosmTvBlPrWBjhmRw8Y'; 
-var AUTH0_DOMAIN='stealth007.auth0.com'; 
-var AUTH0_CALLBACK_URL='http://localhost:8080/#/home';
+var AUTH0_CLIENT_ID='rtbHpAVrGNPYLcosmTvBlPrWBjhmRw8Y';
+var AUTH0_DOMAIN='stealth007.auth0.com';
+var AUTH0_CALLBACK_URL='http://192.168.1.2:5000/#/chat';
 
 var storage = {
 	store : function(key,value) {
@@ -90,7 +110,35 @@ $(function() {
 		var window_height = jQuery(window).height();
 	  jQuery(".main").height(window_height - 120);
 	});
+
+	var hidden, visibilityChange;
+	if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+	  hidden = "hidden";
+	  visibilityChange = "visibilitychange";
+	} else if (typeof document.msHidden !== "undefined") {
+	  hidden = "msHidden";
+	  visibilityChange = "msvisibilitychange";
+	} else if (typeof document.webkitHidden !== "undefined") {
+	  hidden = "webkitHidden";
+	  visibilityChange = "webkitvisibilitychange";
+	}
+
+	// Warn if the browser doesn't support addEventListener or the Page Visibility API
+	if (typeof document.addEventListener === "undefined" || typeof document[hidden] === "undefined") {
+	  console.log("This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
+	} else {
+	  // Handle page visibility change
+	  document.addEventListener(visibilityChange, handleVisibilityChange, false);
+	}
 });
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+
+  } else  {
+    console.log('shown');
+  }
+}
 
 (function () {
 
@@ -100,9 +148,9 @@ $(function() {
     .module('bloom')
     .service('authService', authService);
 
-  authService.$inject = ['lock', 'authManager'];
+  authService.$inject = ['$q','lock', 'authManager'];
 
-  function authService(lock, authManager) {
+  function authService($q,lock, authManager) {
 
     function login() {
       lock.show();
@@ -117,17 +165,38 @@ $(function() {
 
     // Set up the logic for when a user authenticates
     // This method is called from app.run.js
+    var deferredProfile = $q.defer();
+    var userProfile = JSON.parse(localStorage.getItem('profile')) || null;
+
+    if (userProfile) {
+      deferredProfile.resolve(userProfile);
+    }
+
     function registerAuthenticationListener() {
       lock.on('authenticated', function (authResult) {
+
+        lock.getProfile(authResult.idToken, function(error, profile) {
+            if (error) {
+              // Handle error
+              return;
+            }
+
+            localStorage.setItem("profile", JSON.stringify(profile));
+          });
         localStorage.setItem('id_token', authResult.idToken);
         authManager.authenticate();
       });
     }
 
+    function getProfileDeferred() {
+      return deferredProfile.promise;
+    }
+    
     return {
       login: login,
       logout: logout,
-      registerAuthenticationListener: registerAuthenticationListener
+      registerAuthenticationListener: registerAuthenticationListener,
+      getProfileDeferred: getProfileDeferred
     }
   }
 })();
@@ -137,8 +206,6 @@ controller_module.controller('chatCtrl',["$scope", 'authService',function($scope
   //Set the menu item to active
   jQuery(".item").removeClass('active');
   jQuery('[link=chat]').addClass('active');
-  chat_stub.init();
-  file_stub.init();
 
   var window_height = jQuery(window).height();
   jQuery(".main").height(window_height - 120);
@@ -149,17 +216,30 @@ controller_module.controller('chatCtrl',["$scope", 'authService',function($scope
   if(!$scope.isAuthenticated) {
   		vm.authService.login();
   }
-  //console.log($scope.isAuthenticated);
+
+  authService.getProfileDeferred().then(function (profile) {
+        vm.profile = profile;
+        chat_stub.init(profile);
+        file_stub.init();
+  });
+  console.log($scope.isAuthenticated);
 }]);
 
 
-controller_module.controller('filesCtrl',["$scope", function($scope) {
+controller_module.controller('filesCtrl',["$scope",'authService', function($scope,authService) {
     //Set the menu item to active
     jQuery(".item").removeClass('active');
     jQuery('[link=files]').addClass('active');
     file_stub.init();
     var window_height = jQuery(window).height();
     jQuery(".main").height(window_height-60);
+
+    var vm = this;
+  	vm.authService = authService;
+
+  	if(!$scope.isAuthenticated) {
+  		vm.authService.login();
+  	}
 }]);
 
 
@@ -191,17 +271,16 @@ var chat_stub  = {
 		            }
 		        },
 		        message: function(packet) {
-		            //console.log("New Message!!", packet);
 		            self.addMessage(packet);
 		        },
 		        presence: function(presenceEvent) {
 		            // handle presence
 								// console.log(presenceEvent);
 								if(presenceEvent.action === 'state-change') {
-				            if(presenceEvent.state &&  presenceEvent.state.isTyping == true && presenceEvent.uuid != self.uuid ) {
-												//$("[rel=status]").html(presenceEvent.uuid + ' is typing...');
+				            if(presenceEvent.state &&  presenceEvent.state.isTyping == true && presenceEvent.uuid != self.profile.nickname ) {
+												$("[rel=status]").html(presenceEvent.uuid + ' is typing...');
 				            } else {
-												//$("[rel=status]").html("");
+												$("[rel=status]").html("");
 										}
 				        }
 		        }
@@ -210,7 +289,7 @@ var chat_stub  = {
 		    pubnub.subscribe({
 		        channels: [self.channel],
 						withPresence: true,
-						timeout : 10
+						timeout : 50
 		    });
 	},
 	publish : function(data,is_file) {
@@ -220,7 +299,7 @@ var chat_stub  = {
 		//d.setDate(d.getDate()-10);
 		var packet = {
 			content : data,
-			sender : storage.get("uuid")
+			sender : self.profile.nickname
 		};
 		if(is_file) {
 			packet.is_file = true;
@@ -268,19 +347,15 @@ var chat_stub  = {
 	bindEvents : function() {
 		//console.log('ok')
 		var self = this;
-		$(document).on("#login",'click',function(){
-			//console.log('fine')
-			var username = jQuery("#recipient-name").val();
-			if(username != undefined && username != '') {
-				$("#usermodel").modal('hide');
-				self.connect(username);
-				storage.set("uuid",username);
-			}
-		});
+		$(document).off(".chat_event");
 
-		$(document).keypress(function(e) {
+		$(document).on('keypress.chat_event',function(e) {
 		    if(e.which == 13) {
-		        self.publish(jQuery('#content').val(),false);
+						var content = jQuery('#content').val();
+						if(content != undefined && content.length > 0) {
+								self.publish(content,false);
+						}
+
 		    }
 		});
 
@@ -291,23 +366,19 @@ var chat_stub  = {
 			self.publish_status('isTyping',true);
 		});
 
-		$input.keyup(_.debounce(function() {
-			console.log('stopped typing');
+		$input.on("keyup.chat_event",_.debounce(function() {
+			//console.log('stopped typing');
 			self.publish_status('isTyping',false);
 		},3000));
 
 	},
-	init : function() {
+	init : function(profile_param) {
 		var self = this;
-		//storage.set("uuid","harika");
-		var value = storage.get("uuid");
+		self.profile = profile_param;
+		self.unread_count = 0;
 		self.bindEvents();
 		self.precompileTemplates();
-		//if(!value) {
-		    //$("#usermodel").modal('show');
-		//} else {
-		    self.connect(value);
-		//}
+		self.connect(profile_param.nickname);
 	},
 	addMessage : function(packet) {
 		var self = this;
@@ -323,6 +394,20 @@ var chat_stub  = {
 		$("img.lazy").lazyload();
 		self.focusLastMessage();
 		self.populateLastMessageTime(packet.timetoken);
+
+		if(packet.message.sender != self.profile.nickname) {
+
+			if(document.hidden) {
+				self.unread_count += 1;
+			}
+
+			if(self.unread_count > 0) {
+				jQuery("[rel=unread_count]").html(self.unread_count).removeClass('hide');
+			}else{
+				jQuery("[rel=unread_count]").addClass('hide');
+			}
+		}
+
 	},
 	addListOfMessages : function(messages) {
 		var list = '';
@@ -330,7 +415,7 @@ var chat_stub  = {
 		var last_message_time = 0;
 		self.sorted_messages = {};
 		$.each(messages,function(idx,el) {
-			if(jQuery.isPlainObject(el.entry)) {
+			if(jQuery.isPlainObject(el.entry) && el.entry.content != "") {
 				last_message_time = el.timetoken;
 				var date = new Date(el.timetoken/1e4);
 				var key = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
@@ -410,7 +495,7 @@ var chat_stub  = {
 	        }
 	    });
 	},
-	focusLastMessage : function(){
+	focusLastMessage : function() {
 		var trueDivHeight = $('.main')[0].scrollHeight;
 		var divHeight = $('.main').height();
 		$('.main').animate({

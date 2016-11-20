@@ -6,9 +6,9 @@
     .module('bloom')
     .service('authService', authService);
 
-  authService.$inject = ['lock', 'authManager'];
+  authService.$inject = ['$q','lock', 'authManager'];
 
-  function authService(lock, authManager) {
+  function authService($q,lock, authManager) {
 
     function login() {
       lock.show();
@@ -23,17 +23,38 @@
 
     // Set up the logic for when a user authenticates
     // This method is called from app.run.js
+    var deferredProfile = $q.defer();
+    var userProfile = JSON.parse(localStorage.getItem('profile')) || null;
+
+    if (userProfile) {
+      deferredProfile.resolve(userProfile);
+    }
+
     function registerAuthenticationListener() {
       lock.on('authenticated', function (authResult) {
+
+        lock.getProfile(authResult.idToken, function(error, profile) {
+            if (error) {
+              // Handle error
+              return;
+            }
+
+            localStorage.setItem("profile", JSON.stringify(profile));
+          });
         localStorage.setItem('id_token', authResult.idToken);
         authManager.authenticate();
       });
     }
 
+    function getProfileDeferred() {
+      return deferredProfile.promise;
+    }
+    
     return {
       login: login,
       logout: logout,
-      registerAuthenticationListener: registerAuthenticationListener
+      registerAuthenticationListener: registerAuthenticationListener,
+      getProfileDeferred: getProfileDeferred
     }
   }
 })();
