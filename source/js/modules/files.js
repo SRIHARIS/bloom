@@ -13,7 +13,7 @@ var file_stub = {
 
       auth.onAuthStateChanged(function(user) {
         if (user) {
-          console.log('Anonymous user signed-in.', user);
+          //console.log('Anonymous user signed-in.', user);
           jQuery('#file').disabled = false;
         } else {
           console.log('There was no anonymous session. Creating a new anonymous user.');

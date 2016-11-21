@@ -52,8 +52,11 @@ $(function() {
 
 function handleVisibilityChange() {
   if (document.hidden) {
-
+  	pageInFocus = false;
+  	//console.log('hidden');
   } else  {
-    console.log('shown');
+  	pageInFocus = true;
+    //console.log('shown');
   }
+  jQuery(document).trigger('pageFocusChanged');
 }

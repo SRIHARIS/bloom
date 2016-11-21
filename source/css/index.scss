@@ -137,6 +137,7 @@
     }
     .content .header .left-header .text{
         float: left;
+        margin-left : 5px;
     }
 
     .content .header .left-header .level1{
@@ -146,8 +147,8 @@
 
     .content .header .left-header .detail {
         color: #686868;
-        font-size: 0.6rem;
-        margin-top : 5px;
+        font-size: 0.7rem;
+        margin-top : 2px;
     }
 
     .clear{
@@ -182,6 +183,11 @@
         justify-content: center;
         width: 10px;
         height: 10px;
+        bottom : 0;
+    }
+
+    .unread_background {
+        background : #bfefbe !important;
     }
 
     .common_message_row {
@@ -271,7 +277,7 @@
         background: #e4e2e2;
         width: 100%;
         align-items: center;
-        justify-content: space-around;
+        justify-content: center;
         display: flex;
 
         .fixed_text {
@@ -287,10 +293,11 @@
           border-radius: 30px;
         }
 
-        a.upload{
+        a.upload {
+            margin : 0 6px;
             i{
-              font-size: 30px;
-              color : #333;
+              font-size: 24px;
+              color : #575a5f;
             }
         }
     }
@@ -349,6 +356,7 @@
     /* Utility classes */
     .hide{
       display: none;
+      transition: all 1s;
     }
 
 

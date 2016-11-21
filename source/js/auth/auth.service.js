@@ -40,6 +40,7 @@
             }
 
             localStorage.setItem("profile", JSON.stringify(profile));
+            deferredProfile.resolve(profile);
           });
         localStorage.setItem('id_token', authResult.idToken);
         authManager.authenticate();
