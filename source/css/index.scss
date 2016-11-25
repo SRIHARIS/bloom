@@ -159,7 +159,15 @@
 
         .files_opt {
             margin-right : 40px;
-            margin-top: 10px;
+            display: block;
+            margin-top: 5px;
+            float: right;
+        }
+
+        .chat_opt{
+            margin-right : 80px;
+            display: block;
+            margin-top: 7px;
         }
     }
     .clear{
@@ -345,6 +353,7 @@
       width: 90%;
     	max-width: 1100px;
       margin: 0 auto;
+      margin-bottom: 100px;
     }
 
     /*
@@ -376,16 +385,32 @@
 
     .block {
       width: 25%;
+      min-height: 200px;
       height: 200px;
       background-size: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      border: 1px solid #efefef;
-      margin-top: 8px;
+      border: 1px solid #dadedb;
+      margin-top: 16px;
+      position: relative;
+
       i {
           font-size: 80px;
           color: #acb4b9;
+      }
+
+      .title{
+          height: auto;
+          padding: 8px;
+          color : #fff;
+          background: rgba(0,0,0,0.5);
+          position: absolute;
+          bottom : 0;
+          width: 100%;
+          font-size: 0.8rem;
+          box-sizing: border-box;
+          word-wrap: break-word;
       }
     }
 

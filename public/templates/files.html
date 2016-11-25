@@ -1,17 +1,18 @@
 <div class="header">
 	<div class="left-header">
 		<div class="circle">
-			<i class="fa fa-dropbox"></i>
+			<i class="ion-upload"></i>
 		</div>
 		<div class="text">
-			<div class="level1">Files</div>
+			<div class="level1">Drive</div>
 			<div class="detail" rel="file_count">...</div>
 			<div class="clear"></div>
 		</div>
 		<div class="clear"></div>
 	</div>
 	<div class="right-header">
-		  <a rel="upload" class="files_opt"><i class="fa fa-upload"></i></a>
+		  <a rel="upload" class="files_opt"><i class="ion-ios-upload-outline"></i></a>
+			<a href="#/chat" class="chat_opt"><i class="ion-ios-chatbubble-outline"></i></a>
 			<input type="file" id="file" name="file" class="hide"/>
 	</div>
 	<div class="clear"></div>
@@ -32,6 +33,7 @@
 <script id="img_template" type="text/x-handlebars-template">
 			<a target="_blank" href="{{url}}" data-name={{name}}>
 				<div class="block" style="background-image : url('{{url}}')">
+						<div class="title">{{name}}</div>
 				</div>
 			</a>
 </script>
@@ -39,6 +41,7 @@
 				<a target="_blank" href="{{file.url}}" data-name={{name}}>
 					<div class="block" style="background:#fff">
 							<i class="fa fa-file-{{type}}-o"></i>
+							<div class="title">{{name}}</div>
 					</div>
 				</a>
 </script>

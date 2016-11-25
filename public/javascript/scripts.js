@@ -453,7 +453,6 @@ var chat_stub  = {
 		if(!self.sorted_messages.hasOwnProperty(key)) {
 			$("[rel=chat]").append('<div class="date_seperator">' + moment(date).format('Do MMM') + '</div>');
 			self.sorted_messages[key] = [];
-			self.sorted_messages[key].push(markup);
 		}
 
 		$("[rel=chat]").append(markup);
