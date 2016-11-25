@@ -614,7 +614,7 @@ var file_stub = {
         progress_bar.show();
         var ref = firebase.database().ref().child('files');
         var list = '';
-        
+
         ref.on("value", function(snapshot) {
            var files = snapshot.val();
            var keys = _.keys(snapshot.val()).reverse();
@@ -723,7 +723,7 @@ var file_stub = {
               function(snapshot) {
                 // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
                 var progress = Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                jQuery("[rel=file_count]").html(progress + '% uploading...');
+                jQuery("[rel=file_count],[rel=status]").html(progress + '% uploading...');
               }, function(error) {
                 progress_bar.hide();
                 jQuery("[rel=file_count]").html('Failed. Try Again');
