@@ -3,7 +3,6 @@ controller_module.controller('filesCtrl',["$scope",'authService', function($scop
     //Set the menu item to active
     jQuery(".item").removeClass('active');
     jQuery('[link=files]').addClass('active');
-    file_stub.init();
     var window_height = jQuery(window).height();
     jQuery(".main").height(window_height-60);
 
@@ -13,4 +12,9 @@ controller_module.controller('filesCtrl',["$scope",'authService', function($scop
   	if(!$scope.isAuthenticated) {
   		vm.authService.login();
   	}
+
+    authService.getProfileDeferred().then(function (profile) {
+          vm.profile = profile;
+          file_stub.init(profile);
+    });
 }]);

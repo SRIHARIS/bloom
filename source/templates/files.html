@@ -5,24 +5,40 @@
 		</div>
 		<div class="text">
 			<div class="level1">Files</div>
-			<div class="detail" rel="file_count"></div>
+			<div class="detail" rel="file_count">...</div>
 			<div class="clear"></div>
 		</div>
 		<div class="clear"></div>
 	</div>
 	<div class="right-header">
-		  <a rel="upload" class="files_opt"><i class="fa fa-paperclip"></i></a>
+		  <a rel="upload" class="files_opt"><i class="fa fa-upload"></i></a>
 			<input type="file" id="file" name="file" class="hide"/>
 	</div>
 	<div class="clear"></div>
 </div>
-<div rel="progress_bar" class="progress hide">
-		<div class="indeterminate"></div>
-</div>
 <div class="main">
+	<div class="loader"></div>
+	<div class="empty_files hide">
+				<i class="fa fa-magic"></i>
+				There are no files
+	</div>
 	<div class="" rel="chat">
 					<div rel="blocks" id="columns">
 					</div>
         </div>
   	</div>
 </div>
+<!-- Templates -->
+<script id="img_template" type="text/x-handlebars-template">
+			<a target="_blank" href="{{url}}" data-name={{name}}>
+				<div class="block" style="background-image : url('{{url}}')">
+				</div>
+			</a>
+</script>
+<script id="other_template" type="text/x-handlebars-template">
+				<a target="_blank" href="{{file.url}}" data-name={{name}}>
+					<div class="block" style="background:#fff">
+							<i class="fa fa-file-{{type}}-o"></i>
+					</div>
+				</a>
+</script>

@@ -16,10 +16,10 @@ var storage = {
 
 var progress_bar = {
 		show : function(){
-			jQuery('[rel="progress_bar"]').removeClass('hide');
+			jQuery('.loader').removeClass('hide');
 		},
 		hide : function() {
-			jQuery('[rel="progress_bar"]').addClass('hide');
+			jQuery('.loader').addClass('hide');
 		}
 }
 
@@ -49,6 +49,8 @@ $(function() {
 	  document.addEventListener(visibilityChange, handleVisibilityChange, false);
 	}
 });
+
+pageInFocus = true;
 
 function handleVisibilityChange() {
   if (document.hidden) {

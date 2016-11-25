@@ -17,7 +17,7 @@ controller_module.controller('chatCtrl',["$scope", 'authService',function($scope
   authService.getProfileDeferred().then(function (profile) {
         vm.profile = profile;
         chat_stub.init(profile);
-        file_stub.init();
+        file_stub.init(profile);
   });
-  console.log($scope.isAuthenticated);
+  //console.log($scope.isAuthenticated);
 }]);

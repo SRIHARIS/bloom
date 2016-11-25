@@ -1,5 +1,5 @@
 var chat_stub  = {
-	channel : 'politecheese_1',
+	channel : 'politecheese_0',
 	subscribe : function() {
 			var self = this;
 			pubnub.addListener({
@@ -99,13 +99,17 @@ var chat_stub  = {
 		$(document).off(".chat_event");
 
 		$(document).on('keypress.chat_event',function(e) {
-		    if(e.which == 13) {
-						var content = $('#content').val();
-						if(content != undefined && content.length > 0) {
-								self.publish(content,false);
-						}
-
+		    if(e.which == 13 && !e.shiftKey) {
+						self.formSubmit();
 		    }
+		});
+
+		$(document).on('click.chat_event',"[rel=send]",function(){
+				self.formSubmit();
+		});
+
+		$(document).on('click.chat_event',"[rel=clear]",function(){
+				$('#content').val("");
 		});
 
 		var $input = $('#content');
@@ -113,6 +117,12 @@ var chat_stub  = {
 		//on keyup, start the countdown
 		$input.on('keyup', function () {
 			self.publish_status('isTyping',true);
+			var content = $('#content').val();
+			if(content != undefined && content.length > 0) {
+					jQuery("[rel=clear]").removeClass('hide');
+			}else{
+					jQuery("[rel=clear]").addClass('hide');
+			}
 		});
 
 		$input.on("keyup.chat_event",_.debounce(function() {
@@ -127,10 +137,17 @@ var chat_stub  = {
 				_.delay(function(){
 					self.unreadCounter();
 				},1000);
-					
+
 			}
 		});
 
+	},
+	formSubmit : function(){
+			var self = this;
+			var content = $('#content').val();
+			if(content != undefined && content.length > 0) {
+					self.publish(content,false);
+			}
 	},
 	unreadCounter : function() {
 		var last_focus_time = storage.get('last_focus_time');
@@ -149,7 +166,7 @@ var chat_stub  = {
 		$count_bubble = $("[rel=unread_count]");
 		if(cnt > 0) {
 			$count_bubble.html(cnt).removeClass('hide');
-			_.delay(function(){ 
+			_.delay(function(){
 				$count_bubble.addClass('hide');
 				$(".unread_background").removeClass('unread_background');
 			},6000);
@@ -174,6 +191,8 @@ var chat_stub  = {
 
 		if(!self.sorted_messages.hasOwnProperty(key)) {
 			$("[rel=chat]").append('<div class="date_seperator">' + moment(date).format('Do MMM') + '</div>');
+			self.sorted_messages[key] = [];
+			self.sorted_messages[key].push(markup);
 		}
 
 		$("[rel=chat]").append(markup);
@@ -187,7 +206,7 @@ var chat_stub  = {
 				self.unread_count += 1;
 				storage.store("unread_cnt",self.unread_count);
 			}
-		} 
+		}
 
 	},
 	addListOfMessages : function(messages) {
