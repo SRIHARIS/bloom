@@ -1,8 +1,7 @@
 # bloom
 
-Social Networking as a service
 
-Bloom is a open source web application that offers sub set of social networking features and can be hosted on your private servers. Application has following features.
+Bloom is a open source web application that offers features similiar to slack and can be hosted on your private servers. Application has following features.
 
 Take a look
 
